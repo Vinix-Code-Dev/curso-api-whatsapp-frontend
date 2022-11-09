@@ -9,8 +9,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - api_whatsapp_front',
-    title: 'api_whatsapp_front',
+    titleTemplate: '%s',
+    title: 'WhatsApp API Messenger',
     htmlAttrs: {
       lang: 'en'
     },
@@ -48,6 +48,7 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/moment',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -57,7 +58,7 @@ export default {
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
     theme: {
-      dark: true,
+      dark: false,
       themes: {
         dark: {
           primary: colors.blue.darken2,
