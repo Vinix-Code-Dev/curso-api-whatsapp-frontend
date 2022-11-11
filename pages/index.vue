@@ -3,6 +3,7 @@
     <!-- Chat list -->
     <v-col sm="3">
       <v-card elevation="7" class="chat-list">
+        <v-card class="pa-2" color="#424242" dark>Chats</v-card>
         <v-list class="py-0" two-line>
           <v-list-item-group v-model="selected" active-class="green--text">
             <template v-for="(item, index) in items">
