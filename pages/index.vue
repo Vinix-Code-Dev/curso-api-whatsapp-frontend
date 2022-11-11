@@ -3,16 +3,17 @@
     <!-- Chat list -->
     <v-col sm="3">
       <v-card elevation="7" class="chat-list">
+        <v-card class="pa-2" color="#424242" dark>Chats</v-card>
         <v-list class="py-0" two-line>
           <v-list-item-group v-model="selected" active-class="green--text">
             <template v-for="(item, index) in items">
-              <v-list-item :key="item.title">
+              <v-list-item :key="item.wa_id" @click="loadConversation(item)">
                 <template>
                   <v-list-item-content>
-                    <v-list-item-title v-text="item.title"></v-list-item-title>
+                    <v-list-item-title v-text="item.wa_id"></v-list-item-title>
 
                     <v-list-item-subtitle
-                      v-text="item.subtitle"
+                      v-text="item.body"
                     ></v-list-item-subtitle>
                   </v-list-item-content>
                 </template>
@@ -87,55 +88,14 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import Echo from 'laravel-echo'
+window.Pusher = require('pusher-js')
+
 export default {
   data: () => ({
     selected: [2],
-    items: [
-      {
-        subtitle: `I'll be in your neighborhood doing errands this weekend. Do you want to hang out?`,
-        title: 'Ali Connors',
-      },
-      {
-        subtitle: `Wish I could come, but I'm out of town this weekend.`,
-        title: 'Jennifer',
-      },
-      {
-        subtitle: 'Do you have Paris recommendations? Have you ever been?',
-        title: 'Sandra Adams',
-      },
-      {
-        subtitle:
-          'Have any ideas about what we should get Heidi for her birthday?',
-        title: 'Trevor Hansen',
-      },
-      {
-        subtitle:
-          'We should eat this: Grate, Squash, Corn, and tomatillo Tacos.',
-        title: 'Britta Holt',
-      },
-      {
-        subtitle: `I'll be in your neighborhood doing errands this weekend. Do you want to hang out?`,
-        title: 'Ali Connors',
-      },
-      {
-        subtitle: `Wish I could come, but I'm out of town this weekend.`,
-        title: 'Jennifer',
-      },
-      {
-        subtitle: 'Do you have Paris recommendations? Have you ever been?',
-        title: 'Sandra Adams',
-      },
-      {
-        subtitle:
-          'Have any ideas about what we should get Heidi for her birthday?',
-        title: 'Trevor Hansen',
-      },
-      {
-        subtitle:
-          'We should eat this: Grate, Squash, Corn, and tomatillo Tacos.',
-        title: 'Britta Holt',
-      },
-    ],
+    items: [],
     messages: [
       {
         outgoing: false,
@@ -163,41 +123,107 @@ export default {
       },
     ],
     message: '',
+    selectedChat: {},
   }),
+  created() {
+    this.loadMessages()
+  },
+  mounted() {
+    window.Echo = new Echo({
+      broadcaster: 'pusher',
+      key: process.env.pusherAppKey,
+      cluster: process.env.pusherAppCluster,
+      forceTLS: true,
+    })
+
+    window.Echo.channel('webhooks').listen('Webhook', (res) => {
+      const message = res?.message
+      const changed = res?.change
+
+      if (this.selectedChat?.wa_id === message.wa_id) {
+        if (changed === false) {
+          this.appendMessage(message)
+          this.scrollToBottom()
+        } else {
+          const msgIndex = this.messages?.findIndex((el) => {
+            console.log('Element: ' + el.wam_id)
+            console.log('Searched: ' + message.wam_id)
+            return el.wam_id === message.wam_id
+          })
+
+          if (msgIndex !== -1) {
+            Vue.set(this.messages, msgIndex, message)
+          }
+        }
+      }
+    })
+  },
   methods: {
-    sendMessage() {
-      this.messages.push({
-        outgoing: true,
-        body: this.message,
-        created_at: this.$moment().format('L'),
-        status: 'sent',
+    appendMessage(message) {
+      this.messages = this.messages.concat(message)
+    },
+    loadMessages() {
+      this.$axios.get('/messages').then(({ data }) => {
+        this.items = data.data
       })
-      this.message = ''
+    },
+    loadConversation(chat) {
+      this.selectedChat = chat
+      this.$axios.get('/messages/' + chat.wa_id).then(({ data }) => {
+        this.messages = data.data
+        this.scrollToBottom()
+      })
+    },
+    sendMessage() {
+      const payload = {
+        wa_id: this.selectedChat.wa_id,
+        body: this.message,
+      }
+      this.$axios
+        .post('/messages', payload)
+        .then(({ data }) => {
+          this.messages.push({
+            outgoing: data.data.outgoing,
+            body: data.data.body,
+            created_at: this.$moment(data.data.created_at).format('L'),
+            status: data.data.status,
+            wam_id: data.data.wam_id,
+          })
+          this.message = ''
+          this.scrollToBottom()
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    },
+    scrollToBottom() {
+      setTimeout(() => {
+        const container = this.$el.querySelector('.chat-box')
+        if (container?.scrollHeight) {
+          container.scrollTop = container?.scrollHeight
+        }
+      }, 100)
     },
     formatReadStatus(status) {
       const statuses = {
         read: {
           color: 'blue',
           icon: 'mdi-check-all',
-          // tooltip: $t('chat.msgDelivered'),
           tooltip: 'Read',
         },
         delivered: {
           color: 'grey',
           icon: 'mdi-check-all',
-          // tooltip: $t('chat.msgRead'),
           tooltip: 'Delivered',
         },
         sent: {
           color: 'grey',
           icon: 'mdi-check',
-          // tooltip: $t('chat.msgSent'),
           tooltip: 'Sent',
         },
         failed: {
           color: 'red',
           icon: 'mdi-alert-circle',
-          // tooltip: $t('chat.msgFailed'),
           tooltip: 'Failed',
         },
       }

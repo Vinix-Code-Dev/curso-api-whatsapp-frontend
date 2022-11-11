@@ -29,6 +29,11 @@ export default {
   css: [
   ],
 
+  env: {
+    pusherAppKey: process.env.PUSHER_APP_KEY || '0f5b0d6c0818b897742b',
+    pusherAppCluster: process.env.PUSHER_APP_CLUSTER || 'us2'
+  },
+
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
   ],
@@ -52,7 +57,9 @@ export default {
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    baseURL: 'http://localhost:8000/api',
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
