@@ -49,7 +49,22 @@
               :color="message.outgoing ? 'green accent-1' : 'white'"
             >
               <div>
-                <div>{{ message.body }}</div>
+                <div v-if="message.type == 'text'">{{ message.body }}</div>
+                <div v-else-if="message.type == 'image'">
+                  <img :src="message.body" class="img-msg" />
+                </div>
+                <div v-else-if="message.type == 'audio'">
+                  <audio controls>
+                    <source :src="message.body" type="audio/ogg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+                <div v-else-if="message.type == 'video'">
+                  <video width="320" height="240" controls>
+                    <source :src="message.body" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
                 <p class="text-right text-subtitle-2 font-italic">
                   {{ message.created_at }}
                   <v-icon
@@ -260,5 +275,8 @@ export default {
   background-image: url('/bg-whatsapp.png');
   background-repeat: repeat;
   border-color: #efeae2;
+}
+.img-msg {
+  max-width: 300px;
 }
 </style>
