@@ -57,13 +57,18 @@ export default {
   data() {
     return {
       clipped: true,
-      drawer: false,
+      drawer: true,
       fixed: false,
       items: [
         {
           icon: 'mdi-apps',
           title: 'Messenger',
           to: '/',
+        },
+        {
+          icon: 'mdi-email',
+          title: 'Send Messages',
+          to: '/send',
         },
       ],
       miniVariant: false,
