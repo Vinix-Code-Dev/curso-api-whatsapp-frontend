@@ -8,6 +8,7 @@
             v-model="item"
             :items="items"
             label="Templates"
+            outlined
             @change="selectTemplate"
           ></v-select>
 
@@ -16,24 +17,49 @@
             <v-alert v-if="template.status !== 'APPROVED'" type="error"
               >Template unapproved and can't be used to send messages.</v-alert
             >
-            <div v-if="template.header" class="my-3">
+
+            <div class="my-5">
+              <h5 class="text-h5">Recipients</h5>
+              <v-textarea
+                v-model="recipients"
+                outlined
+                hint="Enter one recipient per line."
+                persistent-hint
+              >
+              </v-textarea>
+            </div>
+
+            <div v-if="template.header" class="my-5">
               <h5 class="text-h5">Header</h5>
               <p v-if="template.header.format == 'TEXT'">
                 {{ template.header.text }}
               </p>
               <v-text-field
                 v-else
+                v-model="header_url"
+                outlined
+                class="mt-2"
                 :label="`${template.header.format} URL`"
               ></v-text-field>
             </div>
-            <div v-if="template.body" class="my-3">
+
+            <div v-if="template.body" class="my-5">
               <h5 class="text-h5">Body</h5>
               <p class="pre-wrap">{{ template.body }}</p>
+              <v-text-field
+                v-for="(placeholder, index) in template.body_placeholders"
+                :key="index"
+                v-model="body_placeholders[index]"
+                outlined
+                :label="placeholder.text"
+              ></v-text-field>
             </div>
-            <div v-if="template.footer" class="my-3">
+
+            <div v-if="template.footer" class="my-5">
               <h5 class="text-h5">Footer</h5>
               <p class="pre-wrap">{{ template.footer }}</p>
             </div>
+
             <div v-if="template.buttons" class="my-3">
               <h5 class="text-h5">Buttons</h5>
               <ul>
@@ -41,6 +67,18 @@
                   {{ button.text }} <em>({{ button.type }})</em>
                 </li>
               </ul>
+            </div>
+
+            <div class="mt-8">
+              <v-btn
+                block
+                large
+                color="teal darken-1"
+                dark
+                :loading="sending"
+                @click="send"
+                >Send</v-btn
+              >
             </div>
           </template>
         </div>
@@ -56,6 +94,10 @@ export default {
     template: null,
     templates: [],
     items: [],
+    recipients: [],
+    body_placeholders: [],
+    header_url: null,
+    sending: false,
   }),
   created() {
     this.loadTemplates()
@@ -74,7 +116,31 @@ export default {
     },
     selectTemplate() {
       this.template = this.templates[this.item]
+      this.body_placeholders = []
+      this.header_url = null
       this.formatTemplate()
+    },
+    send() {
+      this.sending = true
+      const payload = {
+        recipients: this.recipients,
+        header_url: this.header_url,
+        header_type: this.template.header?.format || null,
+        body_placeholders: this.body_placeholders,
+        template_name: this.template.name,
+        template_language: this.template.language,
+      }
+      this.$axios
+        .post('/send-message-templates', payload)
+        .then(({ data }) => {
+          alert('Message(s) sucessfully sent!')
+        })
+        .catch((err) => {
+          alert(err)
+        })
+        .finally(() => {
+          this.sending = false
+        })
     },
     formatTemplate() {
       this.template.header = null
@@ -91,7 +157,6 @@ export default {
         else if (element.type === 'BUTTONS')
           this.template.buttons = element.buttons
       })
-      console.log(this.template)
     },
     findPlaceholders(text) {
       const regexp = /{{(.*?)}}/g
