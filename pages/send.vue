@@ -173,7 +173,4 @@ export default {
 </script>
 
 <style>
-.pre-wrap {
-  white-space: pre-wrap;
-}
 </style>

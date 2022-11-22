@@ -50,6 +50,14 @@
             >
               <div>
                 <div v-if="message.type == 'text'">{{ message.body }}</div>
+                <div v-else-if="message.type == 'template'">
+                  <img
+                    v-if="checkHeaderImage(message)"
+                    :src="message.data.header_url"
+                    class="img-msg"
+                  />
+                  <p class="pre-wrap" v-text="message.body"></p>
+                </div>
                 <div v-else-if="message.type == 'image'">
                   <img :src="message.body" class="img-msg" />
                 </div>
@@ -161,8 +169,6 @@ export default {
           this.scrollToBottom()
         } else {
           const msgIndex = this.messages?.findIndex((el) => {
-            console.log('Element: ' + el.wam_id)
-            console.log('Searched: ' + message.wam_id)
             return el.wam_id === message.wam_id
           })
 
@@ -174,6 +180,9 @@ export default {
     })
   },
   methods: {
+    checkHeaderImage(message) {
+      return message.data?.header_type === 'IMAGE'
+    },
     appendMessage(message) {
       this.messages = this.messages.concat(message)
     },
