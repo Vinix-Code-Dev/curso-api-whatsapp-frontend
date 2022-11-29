@@ -119,32 +119,7 @@ export default {
   data: () => ({
     selected: [2],
     items: [],
-    messages: [
-      {
-        outgoing: false,
-        body: 'Nunc tellus magna, volutpat vel orci eu, venenatis vestibulum magna. Morbi fermentum, purus laoreet egestas maximus, metus ex bibendum nulla, in posuere nunc neque id nulla.',
-        created_at: '05/02/2022',
-        status: 'sent',
-      },
-      {
-        outgoing: true,
-        body: 'estibulum pellentesque maximus lacus, quis viverra justo pharetra sed. Curabitur tempus consequat dolor, ut gravida dui pulvinar eget.',
-        created_at: '05/02/2022',
-        status: 'read',
-      },
-      {
-        outgoing: false,
-        body: 'Nulla id eros consequat purus interdum iaculis quis ut orci. Mauris dapibus turpis sit amet egestas consectetur. ',
-        created_at: '05/02/2022',
-        status: 'sent',
-      },
-      {
-        outgoing: true,
-        body: 'estibulum pellentesque maximus lacus, quis viverra justo pharetra sed. Curabitur tempus consequat dolor, ut gravida dui pulvinar eget.',
-        created_at: '05/02/2022',
-        status: 'delivered',
-      },
-    ],
+    messages: [],
     message: '',
     selectedChat: {},
   }),
