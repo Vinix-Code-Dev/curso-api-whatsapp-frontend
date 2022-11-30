@@ -46,7 +46,6 @@
             <div v-if="template.body" class="my-5">
               <h5 class="text-h5">Body</h5>
               <p class="pre-wrap">{{ template.body }}</p>
-              <<<<<<< HEAD ======= >>>>>>> 0622338 (More tweaks to code)
               <v-text-field
                 v-for="(placeholder, index) in template.body_placeholders"
                 :key="index"
